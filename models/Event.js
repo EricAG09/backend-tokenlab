@@ -1,12 +1,15 @@
 const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    title: { type: String, required: true },
     description: { type: String, required: true },
-    startTime: { type: Date, required: true },
-    endTime: { type: Date, required: true },
-    invitees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    date: { type: Date, required: true },
+    location: { type: String, required: true },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Relaciona com o criador do evento
+}, {
+    timestamps: true, // Adiciona createdAt e updatedAt automaticamente
 });
 
-const Event = mongoose.model("Event", eventSchema);
-module.exports = Event;
+module.exports = mongoose.model("Event", eventSchema);

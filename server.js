@@ -18,6 +18,7 @@ app.use(bodyParser.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 
+
 // Banco de dados
 const connectDB = require("./config/db");
 connectDB();
