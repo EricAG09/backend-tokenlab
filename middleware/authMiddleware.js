@@ -1,22 +1,22 @@
-const authMiddleware = require("../authMiddleware");
-const jwt = require('jsonwebtoken');
-
+// middlewares/authMiddleware.js
 const authMiddleware = (req, res, next) => {
-    const authHeader = req.header("Authorization");
+  // Verifique se o token de autenticação está presente no cabeçalho
+  const token = req.headers['authorization'];
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Token não encontrado ou inválido" });
-    }
+  // Para fins de demonstração, vamos usar um token fixo
+  const validToken = 'JWT_SECRET'; // Substitua por um token real
 
-    try {
-        const token = authHeader.split(' ')[1]; // Obtém o token após "Bearer"
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (!token) {
+      return res.status(401).json({ message: 'Token não fornecido' });
+  }
 
-        req.user = decoded.userId; // Adiciona o userId na requisição
-        next();
-    } catch (error) {
-        return res.status(401).json({ message: "Token inválido" });
-    }
+  // Verifique se o token é válido
+  if (token !== validToken) {
+      return res.status(403).json({ message: 'Token inválido' });
+  }
+
+  // Se o token for válido, continue para o próximo middleware ou rota
+  next();
 };
 
 module.exports = authMiddleware;

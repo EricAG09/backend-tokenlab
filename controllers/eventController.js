@@ -1,85 +1,56 @@
+// controllers/eventController.js
 const Event = require('../models/Event');
 
-exports.createEvent = async (req, res) => {
-    const{title, description, date, startTime, endTime, location} = req.body;
-    const userId = req.user;
+// Adicionar um evento
+exports.addEvent = async (req, res) => {
+    const { description, startTime, endTime } = req.body;
 
     try {
-        const event = new Event({ title, description, date, startTime, endTime, location, userId });
-        await event.save();
-        res.status(201).json({message: "Evento criado com sucesso"});
+        const newEvent = new Event({ description, startTime, endTime });
+        await newEvent.save();
+        res.status(201).json(newEvent);
     } catch (error) {
-        res.status(500).json({message: 'Erro ao criar evento', error});
-    }
-}
-
-exports.getEvents = async (req, res) => {
-    const userId = req.user.userId;
-
-    try {
-        const events = await Event.find({ user: userId });
-        res.status(200).json(events);
-    } catch (error) {
-        res.status(500).json({message: 'Erro ao buscar eventos', error});
-    }
-}
-
-exports.getEventById = async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const event = await Event.findById(id).populate("createdBy", "name email");
-
-        if (!event) {
-            return res.status(404).json({ message: "Evento não encontrado" });
-        }
-
-        res.status(200).json(event);
-    } catch (error) {
-        res.status(500).json({ message: "Erro ao buscar evento", error: error.message });
+        res.status(400).json({ message: 'Erro ao adicionar evento', details: error });
     }
 };
 
-exports.updateEvent = async (req, res) => {
+// Listar eventos
+exports.listEvents = async (req, res) => {
+    try {
+        const events = await Event.find();
+        res.status(200).json(events);
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao listar eventos', details: error });
+    }
+};
+
+// Editar um evento
+exports.editEvent = async (req, res) => {
     const { id } = req.params;
-    const { title, description, date, startTime, endTime, location } = req.body;
-    const userId = req.user.userId;
+    const { description, startTime, endTime } = req.body;
 
     try {
-        const event = await Event.findById(id);
-
-        if(!event || event.user.toString() !== userId) {
-            return res.status(404).json({message: "Evento não encontrado"});
+        const updatedEvent = await Event.findByIdAndUpdate(id, { description, startTime, endTime }, { new: true });
+        if (!updatedEvent) {
+            return res.status(404).json({ message: 'Evento não encontrado' });
         }
-
-        event.title = title;
-        event.description = description;
-        event.date = date;
-        event.startTime = startTime;
-        event.endTime = endTime;
-        event.location = location;
-
-        await event.save();
-        res.status(200).json({message: "Evento atualizado com sucesso"});
+        res.status(200).json(updatedEvent);
     } catch (error) {
-        res.status(500).json({message: 'Erro ao atualizar evento', error});
+        res.status(400).json({ message: 'Erro ao editar evento', details: error });
     }
-}
+};
 
+// Remover um evento
 exports.deleteEvent = async (req, res) => {
     const { id } = req.params;
-    const userId = req.user.userId;
 
     try {
-        const event = await Event.findById(id);
-
-        if(!event || event.user.toString() !== userId) {
-            return res.status(404).json({message: "Evento não encontrado"});
+        const deletedEvent = await Event.findByIdAndDelete(id);
+        if (!deletedEvent) {
+            return res.status(404).json({ message: 'Evento não encontrado' });
         }
-
-        await event.remove();
-        res.status(200).json({message: "Evento deletado com sucesso"});
+        res.status(200).json({ message: 'Evento removido com sucesso' });
     } catch (error) {
-        res.status(500).json({message: 'Erro ao deletar evento', error});
+        res.status(500).json({ message: 'Erro ao remover evento', details: error });
     }
-}
+};

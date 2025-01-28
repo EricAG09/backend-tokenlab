@@ -1,15 +1,12 @@
-const express = require("express");
-const { createEvent, getEvents, getEventById } = require("../controllers/eventController");
-const authMiddleware = require("../middlewares/authMiddleware");
+// routes/eventRoutes.js
+const express = require('express');
 const router = express.Router();
+const eventController = require('../controllers/eventController');
 
-// Rota para criar um evento (precisa estar autenticado)
-router.post("/create", authMiddleware, createEvent);
-
-// Rota para listar todos os eventos
-router.get("/", getEvents);
-
-// Rota para obter detalhes de um evento específico
-router.get("/:id", getEventById);
+// Defina as rotas de eventos
+router.post('/', eventController.addEvent); // Adicionar evento
+router.get('/', eventController.listEvents); // Listar eventos
+router.put('/:id', eventController.editEvent); // Editar evento
+router.delete('/:id', eventController.deleteEvent); // Remover evento
 
 module.exports = router;
