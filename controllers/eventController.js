@@ -3,16 +3,28 @@ const Event = require('../models/Event');
 
 // Adicionar um evento
 exports.addEvent = async (req, res) => {
-    const { description, startTime, endTime } = req.body;
+    const { description, startTime, endTime, createdBy } = req.body;
+
+    if (!description || !startTime || !endTime || !createdBy) {
+        return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
+    }
 
     try {
-        const newEvent = new Event({ description, startTime, endTime });
+        const newEvent = new Event({
+            description,
+            startTime,
+            endTime,
+            createdBy, // Associa o evento ao ID do usuário que está criando
+        });
+
         await newEvent.save();
         res.status(201).json(newEvent);
     } catch (error) {
-        res.status(400).json({ message: 'Erro ao adicionar evento', details: error });
+        console.error('Erro ao adicionar evento:', error);
+        res.status(500).json({ message: 'Erro ao adicionar evento', details: error });
     }
 };
+
 
 // Listar eventos
 exports.listEvents = async (req, res) => {

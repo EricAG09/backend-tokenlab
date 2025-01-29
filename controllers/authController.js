@@ -1,5 +1,6 @@
 // controllers/authController.js
 const User = require('../models/user'); // Importa o modelo de usuário
+const jwt = require('jsonwebtoken');
 
 // Controlador de registro
 exports.register = async (req, res) => {
@@ -27,22 +28,26 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Verifica se o usuário existe
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(401).json({ message: 'Usuário não encontrado' });
+            return res.status(404).json({ message: 'Usuário não encontrado' });
         }
 
-        // Verifica se a senha corresponde (sem criptografia, apenas comparação direta)
-        if (user.password !== password) {
+        if (user.password !== password) { // Use hash para senhas em produção
             return res.status(401).json({ message: 'Credenciais inválidas' });
         }
 
-        // Se as credenciais forem válidas, você pode retornar o ID do usuário ou uma mensagem de sucesso
-        res.status(200).json({ message: 'Login bem-sucedido', userId: user._id });
+        const token = jwt.sign({ userId: user._id }, 'JWT_SECRET', { expiresIn: '1h' });
+
+        return res.status(200).json({
+            message: 'Login bem-sucedido',
+            userId: user._id,
+            username: user.name,
+            token: token,
+        });
     } catch (error) {
-        console.error("Erro ao realizar login:", error.message);
-        res.status(500).json({ message: 'Erro ao realizar login' });
+        console.error('Erro no login:', error);
+        res.status(500).json({ message: 'Erro interno no servidor', error });
     }
 };
